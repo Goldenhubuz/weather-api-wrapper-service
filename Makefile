@@ -1,15 +1,31 @@
-scratch:
-	django-admin startproject config .
-
-noidea:
-	git rm -r --cached .idea/
-env:
+gen-env:
 	python3 -m venv env && . env/bin/activate
+migrate:
+	python3 manage.py migrate
+run:
+	python3 manage.py runserver
 i:
-	pip install -r requirements.txt
-mig:
-	python manage.py makemigrations && python manage.py migrate
+	pip install -r requirements/$(file_name).txt
+freeze:
+	pip freeze > requirements/$(file_name).txt
 cru:
 	python manage.py createsuperuser
-run:
-	python manage.py runserver 0.0.0.0:8000
+migration:
+	python3 manage.py makemigrations
+mig:
+	make migration & make migrate
+clear-mig:
+	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete && find . -path "*/migrations/*.pyc"  -delete
+no-db:
+	rm -rf db.sqlite3
+re-django:
+	pip3 uninstall Django -y && pip3 install Django
+startapp:
+	python3 manage.py startapp weather #$(name)
+re-migrate:
+	#make backup &&
+	make no-db && make clear-mig && make re-django
+backup:
+	cp db.sqlite3 backups/db.sqlite3_$(date +"%d-%b-%Y_%H-%M")
+clear-backups:
+	rm -rf backups/*
